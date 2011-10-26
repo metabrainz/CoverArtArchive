@@ -26,12 +26,13 @@ sub find_available_artwork {
     if ($res->is_success) {
         my $xp = XML::XPath->new( xml => $res->content );
         my @artwork = map {
-            my $key = $xp->find('Key', $_);
             Net::CoverArtArchive::CoverArt->new(
-                artwork => "http://s3.amazonaws.com/mbid-$release_mbid/" .
-                    $key->string_value
+                artwork => "http://s3.amazonaws.com/mbid-$release_mbid/$_"
             );
-        } $xp->find('/ListBucketResult/Contents')->get_nodelist;
+        }
+        grep { $_ =~ /([a-z]+)-(\d+)\.jpg$/ } # Skip thumbnails. Should be part of our web service
+        map { $xp->find('Key', $_) }
+            $xp->find('/ListBucketResult/Contents')->get_nodelist;
 
         return partition_by { $_->type } nsort_by { $_->page } @artwork
     }
