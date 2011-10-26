@@ -27,7 +27,6 @@ sub find_available_artwork {
         my $xp = XML::XPath->new( xml => $res->content );
         my @artwork = map {
             my $key = $xp->find('Key', $_);
-            warn $key;
             Net::CoverArtArchive::CoverArt->new(
                 artwork => "http://s3.amazonaws.com/mbid-$release_mbid/" .
                     $key->string_value
