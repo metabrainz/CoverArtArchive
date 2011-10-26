@@ -41,4 +41,19 @@ sub find_available_artwork {
     }
 }
 
+sub find_artwork {
+    my ($self, $release_mbid, $type, $page) = @_;
+    my $url = 'http://s3.amazonaws.com/mbid-' . $release_mbid . '/' .
+        "mbid-$release_mbid-$type-$page.jpg";
+    my $res = $self->lwp->head($url);
+    if ($res->is_success) {
+        Net::CoverArtArchive::CoverArt->new(
+            artwork => $url
+        );
+    }
+    else {
+        return undef;
+    }
+}
+
 1;
