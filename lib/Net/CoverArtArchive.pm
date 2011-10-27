@@ -30,7 +30,13 @@ sub find_available_artwork {
                 artwork => "http://s3.amazonaws.com/mbid-$release_mbid/$_"
             );
         }
-        grep { $_ =~ /([a-z]+)-(\d+)\.jpg$/ } # Skip thumbnails. Should be part of our web service
+        # Skip thumbnails and internal images. Should be part of our web service,
+        # but upon discussion with coverartarchive developers, it's apparently
+        # "too costly" in some way.
+        grep {
+            $_ !~ /^\./ &&
+            $_ =~ /([a-z]+)-(\d+)\.jpg$/ }
+        }
         map { $xp->find('Key', $_) }
             $xp->find('/ListBucketResult/Contents')->get_nodelist;
 
