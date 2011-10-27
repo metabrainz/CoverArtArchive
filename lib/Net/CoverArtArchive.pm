@@ -35,7 +35,7 @@ sub find_available_artwork {
         # "too costly" in some way.
         grep {
             $_ !~ /^\./ &&
-            $_ =~ /([a-z]+)-(\d+)\.jpg$/ }
+            $_ =~ /([a-z]+)-(\d+)\.jpg$/
         }
         map { $xp->find('Key', $_) }
             $xp->find('/ListBucketResult/Contents')->get_nodelist;
