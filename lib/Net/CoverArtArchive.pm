@@ -19,23 +19,23 @@ has lwp => (
     }
 );
 
-has host => (
+has cover_art_archive_prefix => (
     isa => 'Str',
     is => 'ro',
-    default => 'coverartarchive.org',
+    default => 'http://coverartarchive.org',
     required => 1
 );
 
 sub find_available_artwork {
     my ($self, $release_mbid) = @_;
 
-    my $host = $self->host;
-    my $res = $self->lwp->get("http://$host/release/$release_mbid");
+    my $host = $self->cover_art_archive_prefix;
+    my $res = $self->lwp->get("$host/release/$release_mbid");
     if ($res->is_success) {
         my $xp = XML::XPath->new( xml => $res->content );
         my @artwork = map {
             Net::CoverArtArchive::CoverArt->new(
-                artwork => "http://$host/release/$release_mbid/$_"
+                artwork => "$host/release/$release_mbid/$_"
             );
         }
         map {
@@ -62,8 +62,8 @@ sub find_available_artwork {
 
 sub find_artwork {
     my ($self, $release_mbid, $type, $page) = @_;
-    my $host = $self->host;
-    my $url = "http://$host/release/$release_mbid/$type-$page.jpg";
+    my $host = $self->cover_art_archive_prefix;
+    my $url = "$host/release/$release_mbid/$type-$page.jpg";
     my $res = $self->lwp->head($url);
     if ($res->is_success) {
         Net::CoverArtArchive::CoverArt->new(
