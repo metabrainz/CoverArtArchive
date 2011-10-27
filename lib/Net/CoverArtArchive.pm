@@ -19,16 +19,29 @@ has lwp => (
     }
 );
 
+has host => (
+    isa => 'Str',
+    is => 'ro',
+    default => 'coverartarchive.org',
+    required => 1
+);
+
 sub find_available_artwork {
     my ($self, $release_mbid) = @_;
 
-    my $res = $self->lwp->get('http://s3.amazonaws.com/mbid-' . $release_mbid);
+    my $host = $self->host;
+    my $res = $self->lwp->get("http://$host/release/$release_mbid");
     if ($res->is_success) {
         my $xp = XML::XPath->new( xml => $res->content );
         my @artwork = map {
             Net::CoverArtArchive::CoverArt->new(
-                artwork => "http://s3.amazonaws.com/mbid-$release_mbid/$_"
+                artwork => "http://$host/release/$release_mbid/$_"
             );
+        }
+        map {
+            my $path = $_;
+            $path =~ s/mbid-[a-fA-F\-0-9]{36}\-//;
+            $path;
         }
         # Skip thumbnails and internal images. Should be part of our web service,
         # but upon discussion with coverartarchive developers, it's apparently
@@ -49,8 +62,8 @@ sub find_available_artwork {
 
 sub find_artwork {
     my ($self, $release_mbid, $type, $page) = @_;
-    my $url = 'http://s3.amazonaws.com/mbid-' . $release_mbid . '/' .
-        "mbid-$release_mbid-$type-$page.jpg";
+    my $host = $self->host;
+    my $url = "http://$host/release/$release_mbid/$type-$page.jpg";
     my $res = $self->lwp->head($url);
     if ($res->is_success) {
         Net::CoverArtArchive::CoverArt->new(
