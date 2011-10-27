@@ -10,7 +10,7 @@ has _path_split => (
     is => 'ro',
     lazy => 1,
     default => sub {
-        [ shift->artwork =~ /([^\-]+)-(\d+)\.jpg/ ]
+        [ shift->artwork =~ /\/([^\-]+)-(\d+)\.jpg/ ]
     }
 );
 
