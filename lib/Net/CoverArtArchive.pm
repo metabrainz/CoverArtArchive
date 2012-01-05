@@ -1,11 +1,13 @@
 package Net::CoverArtArchive;
 use Moose;
+use namespace::autoclean;
 
 our $VERSION = '1.00';
 
 use List::UtilsBy qw( partition_by nsort_by );
 use LWP::UserAgent;
 use Net::CoverArtArchive::CoverArt;
+use Net::CoverArtArchive::PendingCoverArt;
 use XML::XPath;
 
 has lwp => (
@@ -26,6 +28,14 @@ has cover_art_archive_prefix => (
     required => 1
 );
 
+sub _new_cover_art {
+    my ($host, $release_mbid, $file) = @_;
+    my $class = $file =~ /^\.pending/
+        ? 'Net::CoverArtArchive::PendingCoverArt'
+        : 'Net::CoverArtArchive::CoverArt';
+    return $class->new(artwork => "$host/release/$release_mbid/$file");
+}
+
 sub find_available_artwork {
     my ($self, $release_mbid) = @_;
 
@@ -34,20 +44,16 @@ sub find_available_artwork {
     if ($res->is_success) {
         my $xp = XML::XPath->new( xml => $res->content );
         my @artwork = map {
-            Net::CoverArtArchive::CoverArt->new(
-                artwork => "$host/release/$release_mbid/$_"
-            );
+            _new_cover_art($host, $release_mbid, $_)
         }
         map {
             my $path = $_;
             $path =~ s/mbid-[a-fA-F\-0-9]{36}\-//;
             $path;
         }
-        # Skip thumbnails and internal images. Should be part of our web service,
-        # but upon discussion with coverartarchive developers, it's apparently
-        # "too costly" in some way.
+        # Skip thumbnails.
         grep {
-            $_ !~ /^\./ &&
+            $_ =~ /^\.pending/ ||
             $_ =~ /([a-z]+)-(\d+)\.jpg$/
         }
         map { $xp->find('Key', $_) }
@@ -75,4 +81,5 @@ sub find_artwork {
     }
 }
 
+__PACKAGE__->meta->make_immutable;
 1;

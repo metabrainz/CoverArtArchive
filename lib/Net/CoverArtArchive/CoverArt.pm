@@ -1,5 +1,6 @@
 package Net::CoverArtArchive::CoverArt;
 use Moose;
+use namespace::autoclean;
 
 has artwork => (
     is => 'ro',
@@ -31,4 +32,5 @@ sub small_thumbnail {
     return $uri;
 }
 
+__PACKAGE__->meta->make_immutable;
 1;
