@@ -7,8 +7,12 @@ our $VERSION = '1.00';
 use List::UtilsBy qw( partition_by nsort_by );
 use LWP::UserAgent;
 use Net::CoverArtArchive::CoverArt;
-use Net::CoverArtArchive::PendingCoverArt;
-use XML::XPath;
+use JSON::Any;
+
+has json => (
+    default => sub { JSON::Any->new( utf8 => 1 ) },
+    lazy => 1
+);
 
 has lwp => (
     isa => 'LWP::UserAgent',
@@ -42,42 +46,18 @@ sub find_available_artwork {
     my $host = $self->cover_art_archive_prefix;
     my $res = $self->lwp->get("$host/release/$release_mbid");
     if ($res->is_success) {
-        my $xp = XML::XPath->new( xml => $res->content );
-        my @artwork = map {
-            _new_cover_art($host, $release_mbid, $_)
-        }
-        map {
-            my $path = $_;
-            $path =~ s/mbid-[a-fA-F\-0-9]{36}\-//;
-            $path;
-        }
-        # Skip thumbnails.
-        grep {
-            $_ =~ /^\.pending/ ||
-            $_ =~ /([a-z]+)-(\d+)\.jpg$/
-        }
-        map { $xp->find('Key', $_) }
-            $xp->find('/ListBucketResult/Contents')->get_nodelist;
+        my $index = $self->json->jsonToObj($res->decoded_content);
 
-        return partition_by { $_->type } nsort_by { $_->page } @artwork
+        return map {
+            Net::CoverArtArchive::CoverArt->new(
+                %$_,
+                large_thumbnail => $_->{thumbnails}{large},
+                small_thumbnail => $_->{thumbnails}{small},
+            )
+        } @{ $index->{images} };
     }
     else {
         return ();
-    }
-}
-
-sub find_artwork {
-    my ($self, $release_mbid, $type, $page) = @_;
-    my $host = $self->cover_art_archive_prefix;
-    my $url = "$host/release/$release_mbid/$type-$page.jpg";
-    my $res = $self->lwp->head($url);
-    if ($res->is_success) {
-        Net::CoverArtArchive::CoverArt->new(
-            artwork => $url
-        );
-    }
-    else {
-        return undef;
     }
 }
 

@@ -2,35 +2,52 @@ package Net::CoverArtArchive::CoverArt;
 use Moose;
 use namespace::autoclean;
 
-has artwork => (
+has types => (
+    isa => 'ArrayRef[Str]',
     is => 'ro',
-    required => 1
 );
 
-has _path_split => (
+has is_front => (
+    isa => 'Bool',
     is => 'ro',
-    lazy => 1,
-    default => sub {
-        [ shift->artwork =~ /\/([^\-]+)-(\d+)\.jpg/ ]
-    }
+    init_arg => 'front'
 );
 
-sub type { shift->_path_split->[0] }
-sub page { shift->_path_split->[1] }
+has is_back => (
+    isa => 'Bool',
+    is => 'ro',
+    init_arg => 'back'
+);
 
-sub large_thumbnail {
-    my $self = shift;
-    my $uri = $self->artwork;
-    $uri =~ s/\.jpg/-500\.jpg/;
-    return $uri;
-}
+has comment => (
+    isa => 'Str',
+    is => 'ro',
+);
 
-sub small_thumbnail {
-    my $self = shift;
-    my $uri = $self->artwork;
-    $uri =~ s/\.jpg/-250\.jpg/;
-    return $uri;
-}
+has image => (
+    isa => 'Str',
+    is => 'ro',
+);
+
+has large_thumbnail => (
+    isa => 'Str',
+    is => 'ro',
+);
+
+has small_thumbnail => (
+    isa => 'Str',
+    is => 'ro',
+);
+
+has approved => (
+    isa => 'Bool',
+    is => 'ro',
+);
+
+has edit => (
+    isa => 'Str',
+    is => 'ro',
+);
 
 __PACKAGE__->meta->make_immutable;
 1;
