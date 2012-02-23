@@ -2,6 +2,10 @@ package Net::CoverArtArchive::CoverArt;
 use Moose;
 use namespace::autoclean;
 
+use Moose::Util::TypeConstraints;
+
+coerce 'Bool', from class_type('JSON::XS::Boolean'), via { $_ ? 1 : 0 };
+
 has types => (
     isa => 'ArrayRef[Str]',
     is => 'ro',
@@ -10,13 +14,15 @@ has types => (
 has is_front => (
     isa => 'Bool',
     is => 'ro',
-    init_arg => 'front'
+    init_arg => 'front',
+    coerce => 1
 );
 
 has is_back => (
     isa => 'Bool',
     is => 'ro',
-    init_arg => 'back'
+    init_arg => 'back',
+    coerce => 1
 );
 
 has comment => (
@@ -42,6 +48,7 @@ has small_thumbnail => (
 has approved => (
     isa => 'Bool',
     is => 'ro',
+    coerce => 1
 );
 
 has edit => (

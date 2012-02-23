@@ -4,14 +4,14 @@ use namespace::autoclean;
 
 our $VERSION = '1.00';
 
-use List::UtilsBy qw( partition_by nsort_by );
 use LWP::UserAgent;
 use Net::CoverArtArchive::CoverArt;
 use JSON::Any;
 
 has json => (
     default => sub { JSON::Any->new( utf8 => 1 ) },
-    lazy => 1
+    lazy => 1,
+    is => 'ro'
 );
 
 has lwp => (
@@ -48,16 +48,18 @@ sub find_available_artwork {
     if ($res->is_success) {
         my $index = $self->json->jsonToObj($res->decoded_content);
 
-        return map {
-            Net::CoverArtArchive::CoverArt->new(
-                %$_,
-                large_thumbnail => $_->{thumbnails}{large},
-                small_thumbnail => $_->{thumbnails}{small},
-            )
-        } @{ $index->{images} };
+        return [
+            map {
+                Net::CoverArtArchive::CoverArt->new(
+                    %$_,
+                    large_thumbnail => $_->{thumbnails}{large},
+                    small_thumbnail => $_->{thumbnails}{small},
+                )
+              } @{ $index->{images} }
+          ];
     }
     else {
-        return ();
+        return [];
     }
 }
 
