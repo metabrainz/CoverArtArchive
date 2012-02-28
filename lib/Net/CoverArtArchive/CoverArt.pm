@@ -6,6 +6,12 @@ use Moose::Util::TypeConstraints;
 
 coerce 'Bool', from class_type('JSON::XS::Boolean'), via { $_ ? 1 : 0 };
 
+has id => (
+    isa => 'Int',
+    is => 'ro',
+    required => 1
+);
+
 has types => (
     isa => 'ArrayRef[Str]',
     is => 'ro',
