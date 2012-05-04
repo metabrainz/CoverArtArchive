@@ -1,4 +1,6 @@
 package Net::CoverArtArchive::CoverArt;
+# ABSTRACT: A single cover art image
+
 use Moose;
 use namespace::autoclean;
 
@@ -64,3 +66,49 @@ has edit => (
 
 __PACKAGE__->meta->make_immutable;
 1;
+
+=attr id
+
+The ID of this cover art. Fairly internal, you probably don't need to do
+anything with this.
+
+=attr types
+
+An array reference of strings, where each string describes the type of this
+image. For example, an image might be about a specific medium, or it might be a
+page in a booklet.
+
+=attr is_front
+
+Whether this image is considered to be the 'frontiest' image of a release.
+
+=attr is_back
+
+Whether this image is considered to be the 'backiest' image of a release.
+
+=attr comment
+
+A string potentially describing additionally information about this image. Free
+text and unstructured.
+
+=attr image
+
+The full URL of the image
+
+=attr large_thumbnail
+
+A URL to the large thumbnail of this image.
+
+=attr small_thumbnail
+
+A URL to the small thumbnail of this image.
+
+=attr approved
+
+Whether this image has passed peer review.
+
+=attr edit
+
+A URL to the MusicBrainz edit that originally added this piece of artwork.
+
+=cut
