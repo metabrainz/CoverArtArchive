@@ -4,8 +4,6 @@ package Net::CoverArtArchive;
 use Moose;
 use namespace::autoclean;
 
-our $VERSION = '0.99-TRIAL';
-
 use LWP::UserAgent;
 use Net::CoverArtArchive::CoverArt;
 use JSON::Any;
