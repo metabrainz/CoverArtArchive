@@ -1,0 +1,5 @@
+1.01 Fri, May 11 2012
+    - Removed incorrect $VERSION variable from Net::CoverArtArchive
+
+1.00
+    - Initial release
